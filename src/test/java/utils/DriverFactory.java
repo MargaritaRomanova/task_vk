@@ -13,9 +13,9 @@ public class DriverFactory {
     private final static String DRIVER_PATH = "src/test/resources/";
     private static WebDriver driver;
 
-    public static WebDriver getDriver(Browser browser) {
+    public static WebDriver getDriver() {
         File file;
-
+        Browser browser = PropertyReader.getBrowser();
         switch (browser) {
             case CHROME:
                 file = new File(DRIVER_PATH + "chromedriver_108.exe");

@@ -9,24 +9,31 @@ import utils.PropertyReader;
 
 public class UITests extends BaseTest {
 
-    @Test()
-    public void vk_edit_profile() {
+    /**
+     * Метод авторизации в системе vk
+     *
+     * @return возвращает страницу NewsPage
+     */
+    private NewsPage login() {
         AuthLoginPage authLoginPage = new AuthLoginPage();
         authLoginPage.verifyLoginFieldIsEmpty();
         Assert.assertTrue(authLoginPage.getLoginField().isEmpty(),
                 "поле ввода логина не удалось очистить");
-        authLoginPage.inputLogin(PropertyReader.getLogin());
-        authLoginPage.checkInputLoginContainsText(PropertyReader.getLogin());
-        authLoginPage.verifyCheckboxDeActive();
+        AuthPassPage authPassPage = authLoginPage.inputLogin(PropertyReader.getLogin())
+                .checkInputLoginContainsText(PropertyReader.getLogin())
+                .verifyCheckboxDeActive()
+                .pressSignInButton();
+        authPassPage.inputPass(PropertyReader.getPassword())
+                .checkInputPasswordContainsText();
+        return authPassPage.pressContinueButton();
+    }
 
-        AuthPassPage authPassPage = authLoginPage.pressSignInButton();
-        authPassPage.inputPass(PropertyReader.getPassword());
-        authPassPage.checkInputPasswordContainsText();
-        NewsPage newsPage = authPassPage.pressContinueButton();
+    @Test(description = "редактирование личного профиля")
+    public void vk_edit_profile() throws InterruptedException {
+        NewsPage newsPage = login();
         newsPage.choosePageInSideBar("Моя страница");
-
-        MyPage myPage = new MyPage();
-        EditPage editPage = myPage.pressEditProfileButton();
+        EditPage editPage = new MyPage()
+                .pressEditProfileButton();
 
         //•	Получить всю информацию о текущем профиле
         editPage.getProfileName();
@@ -40,12 +47,17 @@ public class UITests extends BaseTest {
         String town = editPage.inputHomeTownField("Москва");
 
         //•	Сменить фото профиля на любую другую
-        editPage.avatarAction("Загрузить фотографию");
-        editPage.pressSaveButton();
-        editPage.verifyInfoWasSaved();
+        editPage.deleteAvatar();
+        editPage.uploadAvatar("кот.jpg")
+                .pressSaveButton()
+                .verifyInfoWasSaved();
+        editPage.refresh();
 
         //ПОСТУСЛОВИЕ  • Удалить измененные данные профиля
-        editPage.avatarAction("Удалить");
+        editPage.deleteAvatar();
+        editPage.uploadAvatar("dwoilp3BVjlE.jpg")
+                .pressSaveButton()
+                .verifyInfoWasSaved();
 
         editPage.inputInfoAboutMyselfField(infoAboutMyself);
         editPage.inputStatusDropdown(status);
@@ -53,24 +65,13 @@ public class UITests extends BaseTest {
         editPage.inputMonth(month);
         editPage.inputYear(year);
         editPage.inputHomeTownField(town);
-        editPage.pressSaveButton();
-        editPage.verifyInfoWasSaved();
+        editPage.pressSaveButton()
+                .verifyInfoWasSaved();
     }
 
-    @Test()
+    @Test(description = "работа с личными сообщениями")
     public void vk_conversation() throws InterruptedException {
-        AuthLoginPage authLoginPage = new AuthLoginPage();
-        authLoginPage.verifyLoginFieldIsEmpty();
-        Assert.assertTrue(authLoginPage.getLoginField().isEmpty(),
-                "поле ввода логина не удалось очистить");
-        authLoginPage.inputLogin(PropertyReader.getLogin());
-        authLoginPage.checkInputLoginContainsText(PropertyReader.getLogin());
-        authLoginPage.verifyCheckboxDeActive();
-
-        AuthPassPage authPassPage = authLoginPage.pressSignInButton();
-        authPassPage.inputPass(PropertyReader.getPassword());
-        authPassPage.checkInputPasswordContainsText();
-        NewsPage newsPage = authPassPage.pressContinueButton();
+        NewsPage newsPage = login();
         newsPage.choosePageInSideBar("Мессенджер");
 
         MessengerPage messengerPage = new MessengerPage();
@@ -86,13 +87,13 @@ public class UITests extends BaseTest {
         Assert.assertEquals(countBeforeCreate + 1, countAfterCreate, "диалог не был создан");
 
         //•	Пометить беседу как "важно"
-        messengerPage.actionWithDialogue("Закрепить в списке чатов");
-        messengerPage.verifyTheDialogueWasPinned("Просто беседа");
+        messengerPage.actionWithDialogue("Закрепить в списке чатов")
+                .verifyTheDialogueWasPinned("Просто беседа");
 
         //•	Переименовать беседу в "Ну очень важная беседа"
-        messengerPage.pressTitleForEdit();
-        messengerPage.changeTitleChatAndPressEnter("Ну очень важная беседа");
-        messengerPage.closeEditModalWindow();
+        messengerPage.pressTitleForEdit()
+                .changeTitleChatAndPressEnter("Ну очень важная беседа")
+                .closeEditModalWindow();
         Thread.sleep(1000);
         messengerPage.verifyChangeTitle("Просто беседа", "Ну очень важная беседа");
 
@@ -100,8 +101,8 @@ public class UITests extends BaseTest {
         int countPersonBeforeAddDialogue = messengerPage.getCountPeople();
 
         //•	Добавить нового участника
-        messengerPage.pressAddNewPersonInDialogue();
-        messengerPage.addNewPersonInDialogue();
+        messengerPage.pressAddNewPersonInDialogue()
+                .addNewPersonInDialogue();
 
         int countPersonAfterAddDialogue = messengerPage.getCountPeople();
         Assert.assertEquals(countPersonBeforeAddDialogue + 1, countPersonAfterAddDialogue,
@@ -116,71 +117,84 @@ public class UITests extends BaseTest {
         messengerPage.editMessage("Это очень важная беседа, выходить!", "Это очень важная беседа, НЕ выходить!");
 
         //•	Закрепить сообщение
-        messengerPage.pinAMessageAtTheTop("Это очень важная беседа, НЕ выходить!");
-        Thread.sleep(1000);
-        messengerPage.verifyPinMessage("Это очень важная беседа, НЕ выходить!");
+        messengerPage.pinAMessageAtTheTop("Это очень важная беседа, НЕ выходить!")
+                .verifyPinMessage("Это очень важная беседа, НЕ выходить!");
 
         //•	Написать в группу сообщение - "А нет, лучше в группу"
         messengerPage.writeAndSendMessage("А нет, лучше в группу");
 
         //ПОСТУСЛОВИЕ  • Удалить беседу
-        messengerPage.actionWithDialogue("Выйти из чата");
-        messengerPage.activateAllMessagesCheckbox();
-        messengerPage.pressLeaveTheChatButton();
-        Thread.sleep(1000);
+        messengerPage.actionWithDialogue("Выйти из чата")
+                .activateAllMessagesCheckbox()
+                .pressLeaveTheChatButton();
         int countAfterDelete = messengerPage.getCountDialogues();
         Assert.assertEquals(countAfterCreate - 1, countAfterDelete, "диалог не был удален");
     }
 
-//    @Test()
-//    public void vk_discussions() {
-//        AuthLoginPage authLoginPage = new AuthLoginPage();
-//        authLoginPage.verifyLoginFieldIsEmpty();
-//        Assert.assertTrue(authLoginPage.getLoginField().isEmpty(),
-//                "поле ввода логина не удалось очистить");
-//        authLoginPage.inputLogin(PropertyReader.getLogin());
-//        authLoginPage.checkInputLoginContainsText(PropertyReader.getLogin());
-//        authLoginPage.verifyCheckboxDeActive();
-//
-//        AuthPassPage authPassPage = authLoginPage.pressSignInButton();
-//        authPassPage.inputPass(PropertyReader.getPassword());
-//        authPassPage.checkInputPasswordContainsText();
-//        NewsPage newsPage = authPassPage.pressContinueButton();
-//        newsPage.choosePageInSideBar("Мессенджер");
-//    }
+    @Test(description = "работа с группами")
+    public void vk_discussions() throws InterruptedException {
+        NewsPage newsPage = login();
+        newsPage.choosePageInSideBar("Сообщества");
+        DiscussionsPage discussionsPage = new DiscussionsPage();
 
-    @Test()
+        //•	Создать группу
+        discussionsPage.pressCreateGroupButton()
+                .selectTypeOfGroup("Группа по интересам")
+                .inputFieldsAndPressCreateButton("Мототехника", "Мототехника");
+
+        //•	Добавить новую тему для обсуждений
+        discussionsPage.selectDiscussions()
+                .createTopic("Новая тема", "Описание");
+
+        //•	Закрепить тему в списке обсуждений группы
+        discussionsPage.pressEditTopicButton()
+                .activatePinTopicCheckbox()
+                .pressSaveButton()
+                .verifyInfoWasSaved();
+        discussionsPage.goToCrumb();
+        discussionsPage.verifyPinTopic("Новая тема");
+        discussionsPage.selectTopic("Новая тема");
+
+        //•	Написать 3 комментария с произвольным текстом
+        String message_id1 = discussionsPage.writeMessage("первое сообщение");
+        String message_id2 = discussionsPage.writeMessage("второе сообщение");
+        discussionsPage.writeMessage("третье сообщение");
+
+        //•	Поменять текст в предпоследнем комментарии
+        discussionsPage.editComment(message_id2, "измененное второе сообщение")
+                .verifyCommentWasEdited(message_id2, "измененное второе сообщение");
+
+        //•	Удалить первый комментарий
+        discussionsPage.deleteComment(message_id1)
+                .verifyCommentWasDeleted(message_id1);
+
+        //•	ПОСТУСЛОВИЕ удалить тему\ покинуть группу
+        discussionsPage.pressEditTopicButton()
+                .deleteTopic()
+                .verifyTopicWasDeleted();
+        discussionsPage.choosePageInSideBar("Сообщества");
+        discussionsPage.deleteGroup();
+    }
+
+    @Test(description = "работам в фотографиями в альбомах")
     public void vk_photos() throws InterruptedException {
-        AuthLoginPage authLoginPage = new AuthLoginPage();
-        authLoginPage.verifyLoginFieldIsEmpty();
-        Assert.assertTrue(authLoginPage.getLoginField().isEmpty(),
-                "поле ввода логина не удалось очистить");
-        authLoginPage.inputLogin(PropertyReader.getLogin());
-        authLoginPage.checkInputLoginContainsText(PropertyReader.getLogin());
-        authLoginPage.verifyCheckboxDeActive();
-
-        AuthPassPage authPassPage = authLoginPage.pressSignInButton();
-        authPassPage.inputPass(PropertyReader.getPassword());
-        authPassPage.checkInputPasswordContainsText();
-        NewsPage newsPage = authPassPage.pressContinueButton();
+        NewsPage newsPage = login();
         newsPage.choosePageInSideBar("Фотографии");
-
         PhotoPage photoPage = new PhotoPage();
 
         //•	Создать приватный альбом
-        photoPage.pressCreateAlbumButton();
-        photoPage.inputFieldAndCreateAlbum("Tест Приватный",
-                "Автотест Приватный Альбом Описание", "Только я", "Только я");
+        photoPage.pressCreateAlbumButton()
+                .inputFieldAndCreateAlbum("Тест Приватный",
+                        "Автотест Приватный Альбом Описание", "Только я", "Только я");
 
         //•	Добавить фотографию в альбом
-        photoPage.loadPhoto();
-        photoPage.verifyCountPhotoInAlbum(1);
-
-        photoPage.clickOnPhoto();
+        photoPage.loadPhoto()
+                .verifyCountPhotoInAlbum(1);
 
         //•	Сделать фотографию обложкой альбома
-        photoPage.moreActionsWithPhoto("Сделать обложкой альбома");
-        photoPage.verifyPhotoAsAlbumCover();
+        photoPage.clickOnPhoto()
+                .moreActionsWithPhoto("Сделать обложкой альбома")
+                .verifyPhotoAsAlbumCover();
 
         //•	Прокомментировать фотографию
         photoPage.addCommentForPhoto("Тестовый комментарий для фотографии");
@@ -188,45 +202,41 @@ public class UITests extends BaseTest {
         //•	Добавить отметку на фотографию
         photoPage.tagAPersonOnPhoto("Отметить человека", "Тест Автотест");
         photoPage.pressEscape();
-
         photoPage.choosePageInSideBar("Фотографии");
-        photoPage.verifyAlbumIsPrivate("Tест Приватный");
+        photoPage.verifyAlbumIsPrivate("Тест Приватный");
 
         //•	Создать публичный альбом
-        photoPage.pressCreateAlbumButton();
-        photoPage.inputFieldAndCreateAlbum("Tест публичный",
-                "Автотест публичный Альбом Описание", "Все пользователи", "Все пользователи");
+        photoPage.pressCreateAlbumButton()
+                .inputFieldAndCreateAlbum("Тест публичный",
+                        "Автотест публичный Альбом Описание", "Все пользователи", "Все пользователи");
 
         photoPage.choosePageInSideBar("Фотографии");
-        photoPage.openAlbum("Tест публичный");
-        photoPage.verifyCountPhotoInAlbum(0);
-
+        photoPage.openAlbum("Тест публичный")
+                .verifyCountPhotoInAlbum(0);
         photoPage.back();
-        photoPage.openAlbum("Tест Приватный");
-        photoPage.verifyCountPhotoInAlbum(1);
-        photoPage.clickOnPhoto();
+        photoPage.openAlbum("Тест Приватный")
+                .verifyCountPhotoInAlbum(1);
 
         //•	Перенести туда фотографию
-        photoPage.moreActionsWithPhoto("Перенести в альбом");
-        photoPage.importPhotoInAlbum("Tест публичный");
-        photoPage.verifyNotificationImportPhoto();
+        photoPage.clickOnPhoto()
+                .moreActionsWithPhoto("Перенести в альбом")
+                .importPhotoInAlbum("Тест публичный")
+                .verifyNotificationImportPhoto();
         photoPage.pressEscape();
         photoPage.refresh();
         photoPage.verifyCountPhotoInAlbum(0);
-
         photoPage.back();
-        photoPage.openAlbum("Tест публичный");
-        photoPage.verifyCountPhotoInAlbum(1);
-
+        photoPage.openAlbum("Тест публичный")
+                .verifyCountPhotoInAlbum(1);
         photoPage.back();
-        photoPage.openAlbum("Tест Приватный");
 
         //•	Удалить первый альбом
-        photoPage.deleteAlbum("Tест Приватный");
+        photoPage.openAlbum("Тест Приватный")
+                .deleteAlbum("Тест Приватный");
 
         //ПОСТУСЛОВИЕ  • Удалить публичный альбом
-        photoPage.openAlbum("Tест публичный");
-        photoPage.deleteAlbum("Tест публичный");
-        photoPage.verifyAllAlbumsWereDeleted();
+        photoPage.openAlbum("Тест публичный");
+        photoPage.deleteAlbum("Тест публичный")
+                .verifyAllAlbumsWereDeleted();
     }
 }

@@ -14,8 +14,9 @@ public class AuthPassPage extends BasePage {
         super();
     }
 
-    public void inputPass(String text) {
+    public AuthPassPage inputPass(String text) {
         driver.findElement(PASSWORD_FIELD).sendKeys(text);
+        return this;
     }
 
     public NewsPage pressContinueButton() {

@@ -20,24 +20,27 @@ public class AuthLoginPage extends BasePage {
         return elLoginField.getAttribute("value");
     }
 
-    public void verifyLoginFieldIsEmpty() {
+    public AuthLoginPage verifyLoginFieldIsEmpty() {
         WebElement elLoginField = driver.findElement(LOGIN_FIELD);
         if (!elLoginField.getAttribute("value").isEmpty()) {
             elLoginField.clear();
         }
+        return this;
     }
 
-    public void verifyCheckboxDeActive() {
+    public AuthLoginPage verifyCheckboxDeActive() {
         WebElement el = driver.findElement(CHECKBOX);
         if (el.isDisplayed()) {
             el.click();
         }
         Assert.assertFalse(el.isDisplayed(), "чекбокс 'Сохранить вход' не удалось деактивировать");
+        return this;
     }
 
-    public void inputLogin(String text) {
+    public AuthLoginPage inputLogin(String text) {
         WebElement elLoginField = driver.findElement(LOGIN_FIELD);
         elLoginField.sendKeys(text);
+        return this;
     }
 
     public AuthPassPage pressSignInButton() {
@@ -45,11 +48,12 @@ public class AuthLoginPage extends BasePage {
         return new AuthPassPage();
     }
 
-    public void checkInputLoginContainsText(String text) {
+    public AuthLoginPage checkInputLoginContainsText(String text) {
         WebElement elLoginField = driver.findElement(LOGIN_FIELD);
         String actualText = elLoginField.getAttribute("value");
         Assert.assertFalse(actualText.isEmpty(), "Поле ввода логина не заполнено");
         Assert.assertEquals(actualText, text,
                 "Поле ввода логина содержит текст:" + actualText + " ожидалось: " + text);
+        return this;
     }
 }

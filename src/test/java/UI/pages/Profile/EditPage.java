@@ -70,44 +70,38 @@ public class EditPage extends MainPage {
         return value;
     }
 
+    private void selectDropdown(WebElement element, String value) {
+        element.click();
+        WebElement option = element.findElement(OPTION);
+        clickWithJavascript(option.findElement(By.xpath(".//li[text()='" + value + "']")));
+    }
+
     public String inputStatusDropdown(String text) {
-        WebElement el = driver.findElement(STATUS_DROPDOWN).findElement(By.xpath(".//input[@type='text']"));
-        WebElement el2 = driver.findElement(STATUS_DROPDOWN).findElement(OPTION);
-        String value = el.getAttribute("value");
-        el.click();
-        el2.findElement(By.xpath(".//li[text()='" + text + "']")).click();
-        el.click();
-        return value;
+        WebElement element = driver.findElement(STATUS_DROPDOWN);
+        String oldText = element.findElement(By.xpath(".//input[@type='text']")).getAttribute("value");
+        selectDropdown(element, text);
+        return oldText;
     }
 
     public String inputDay(String dayNew) {
-        WebElement dayField = driver.findElement(DAY).findElement(By.xpath(".//input[@type='text']"));
-        WebElement dayOption = driver.findElement(DAY).findElement(OPTION);
-        String value = dayField.getAttribute("value");
-        dayField.click();
-        dayOption.findElement(By.xpath(".//li[text()='" + dayNew + "']")).click();
-        dayField.click();
-        return value;
+        WebElement element = driver.findElement(DAY);
+        String oldText = element.findElement(By.xpath(".//input[@type='text']")).getAttribute("value");
+        selectDropdown(element, dayNew);
+        return oldText;
     }
 
     public String inputMonth(String monthNew) {
-        WebElement monthField = driver.findElement(MONTH).findElement(By.xpath(".//input[@type='text']"));
-        WebElement monthOption = driver.findElement(MONTH).findElement(OPTION);
-        String value = monthField.getAttribute("value");
-        monthField.click();
-        monthOption.findElement(By.xpath(".//li[text()='" + monthNew + "']")).click();
-        monthField.click();
-        return value;
+        WebElement element = driver.findElement(MONTH);
+        String oldText = element.findElement(By.xpath(".//input[@type='text']")).getAttribute("value");
+        selectDropdown(element, monthNew);
+        return oldText;
     }
 
     public String inputYear(String yearNew) {
-        WebElement yearField = driver.findElement(YEAR).findElement(By.xpath(".//input[@type='text']"));
-        WebElement yearOption = driver.findElement(YEAR).findElement(OPTION);
-        String value = yearField.getAttribute("value");
-        yearField.click();
-        yearOption.findElement(By.xpath(".//li[text()='" + yearNew + "']")).click();
-        yearField.click();
-        return value;
+        WebElement element = driver.findElement(YEAR);
+        String oldText = element.findElement(By.xpath(".//input[@type='text']")).getAttribute("value");
+        selectDropdown(element, yearNew);
+        return oldText;
     }
 
     public String inputHomeTownField(String text) {
@@ -120,34 +114,45 @@ public class EditPage extends MainPage {
         return value;
     }
 
-    public void avatarAction(String action) {
+    public EditPage uploadAvatar(String photoName) throws InterruptedException {
         WebElement avatar = driver.findElement(PROFILE_EDIT_AVATAR);
-        avatar.click();
-        WebElement opt = driver.findElement(OPTION_PROFILE_EDIT_AVATAR);
-        Assert.assertTrue(opt.getText().contains(action), action + " - действие отсутствует");
-        WebElement optAction = opt.findElement(By.xpath(".//span[text()='" + action + "']"));
-        if (action.equals("Загрузить фотографию")) {
+        clickWithJavascript(avatar);
+        if (isElementFoundAndDisplayed(OPTION_PROFILE_EDIT_AVATAR, 5)) {
+            WebElement opt = driver.findElement(OPTION_PROFILE_EDIT_AVATAR);
+            Assert.assertTrue(opt.getText().contains("Загрузить фотографию"), "Загрузить фотографию" + " - действие отсутствует");
+            WebElement optAction = opt.findElement(By.xpath(".//span[text()='Загрузить фотографию']"));
             optAction.click();
-            driver.findElement(LOAD_MODAL_WINDOW);
-            By fileInput = By.cssSelector("input[type=file]");
-            String filePath = Paths.get(Paths.get("").toAbsolutePath().toString(),
-                    "src", "test", "resources", "files", "dwoilp3BVjlE.jpg").toString();
-            driver.findElement(fileInput).sendKeys(filePath);
-            driver.findElement(PHOTO_IS_LOAD_MODAL_WINDOW).findElement(SAVE_AND_CONTINUE_BUTTON).click();
-            driver.findElement(CHOOSE_MINIATURE_MODAL_WINDOW).findElement(SAVE_CHANGES_BUTTON).click();
-            driver.findElement(COMPLETION_MODAL_WINDOW).findElement(CONTINUE_BUTTON).click();
-            softAssert.assertTrue(driver.findElement(NOTIFICATION).isDisplayed(), "уведомление отсутствует");
-            Assert.assertTrue(driver.findElement(IMAGE).isDisplayed(), "фотография не прикреплена");
         }
-        if (action.equals("Удалить")) {
-            optAction.click();
-            driver.findElement(DELETE_PHOTO_MODAL_WINDOW).findElement(DELETE_BUTTON).click();
-            Assert.assertTrue(driver.findElement(START_IMAGE).isDisplayed(), "фотография не удалена");
-        }
+        driver.findElement(LOAD_MODAL_WINDOW);
+        By fileInput = By.cssSelector("input[type=file]");
+        String filePath = Paths.get(Paths.get("").toAbsolutePath().toString(),
+                "src", "test", "resources", "files", photoName).toString();
+        driver.findElement(fileInput).sendKeys(filePath);
+        driver.findElement(PHOTO_IS_LOAD_MODAL_WINDOW).findElement(SAVE_AND_CONTINUE_BUTTON).click();
+        driver.findElement(CHOOSE_MINIATURE_MODAL_WINDOW).findElement(SAVE_CHANGES_BUTTON).click();
+        driver.findElement(COMPLETION_MODAL_WINDOW).findElement(CONTINUE_BUTTON).click();
+        softAssert.assertTrue(driver.findElement(NOTIFICATION).isDisplayed(), "уведомление отсутствует");
+        Assert.assertTrue(driver.findElement(IMAGE).isDisplayed(), "фотография не прикреплена");
+        return this;
     }
 
-    public void pressSaveButton() {
-        driver.findElement(SAVE_BUTTON).click();
+    public EditPage deleteAvatar() throws InterruptedException {
+        WebElement avatar = driver.findElement(PROFILE_EDIT_AVATAR);
+        clickWithJavascript(avatar);
+        if (isElementFoundAndDisplayed(OPTION_PROFILE_EDIT_AVATAR, 5)) {
+            WebElement opt = driver.findElement(OPTION_PROFILE_EDIT_AVATAR);
+            Assert.assertTrue(opt.getText().contains("Удалить"), "Удалить" + " - действие отсутствует");
+            WebElement optAction = opt.findElement(By.xpath(".//span[text()='Удалить']"));
+            optAction.click();
+        }
+        driver.findElement(DELETE_PHOTO_MODAL_WINDOW).findElement(DELETE_BUTTON).click();
+        Assert.assertTrue(driver.findElement(START_IMAGE).isDisplayed(), "фотография не удалена");
+        return this;
+    }
+
+    public EditPage pressSaveButton() {
+        clickWithJavascript(driver.findElement(SAVE_BUTTON));
+        return this;
     }
 
     public void verifyInfoWasSaved() {

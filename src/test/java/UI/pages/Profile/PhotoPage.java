@@ -6,6 +6,7 @@ import org.openqa.selenium.WebElement;
 import org.testng.Assert;
 
 import java.nio.file.Paths;
+import java.util.List;
 
 public class PhotoPage extends MainPage {
 
@@ -44,8 +45,9 @@ public class PhotoPage extends MainPage {
     private final static By DELETE_ALBUM_MODAL_WINDOW = By.xpath("//div[@class='box_layout'][.//text()='Удаление альбома']");
     private final static By DELETE_BUTTON = By.xpath(".//button[.//span[text()='Удалить']]");
 
-    public void pressCreateAlbumButton() {
+    public PhotoPage pressCreateAlbumButton() {
         driver.findElement(CREATE_ALBUM_BUTTON).click();
+        return this;
     }
 
     public void inputFieldAndCreateAlbum(String title, String description, String whoCanView, String whoCanComment) {
@@ -64,13 +66,14 @@ public class PhotoPage extends MainPage {
         driver.findElement(By.xpath("//div[contains(@class,'page_block_header')][./div[text()='" + title + "']]"));
     }
 
-    public void loadPhoto() throws InterruptedException {
+    public PhotoPage loadPhoto() throws InterruptedException {
         By fileInput = By.cssSelector("input[type=file]");
         String filePath = Paths.get(Paths.get("").toAbsolutePath().toString(),
                 "src", "test", "resources", "files", "dwoilp3BVjlE.jpg").toString();
         driver.findElement(fileInput).sendKeys(filePath);
         Thread.sleep(5000);
         Assert.assertTrue(driver.findElement(PHOTO).isDisplayed(), "фотография в альбом не добавлена");
+        return this;
     }
 
     public void verifyCountPhotoInAlbum(int count) {
@@ -79,11 +82,12 @@ public class PhotoPage extends MainPage {
                 "количество фотографий не совпадает, ожидалось: " + count + ", найдено :" + countPhoto);
     }
 
-    public void clickOnPhoto() {
+    public PhotoPage clickOnPhoto() {
         clickWithJavascript(driver.findElement(PHOTO));
+        return this;
     }
 
-    public void moreActionsWithPhoto(String text) throws InterruptedException {
+    public PhotoPage moreActionsWithPhoto(String text) throws InterruptedException {
         if (isElementFoundAndDisplayed(MORE_ACTIONS_BUTTON, 7)) {
             WebElement action = driver.findElement(PHOTO_MODAL_WINDOW).findElement(MORE_ACTIONS_BUTTON);
             action.click();
@@ -91,6 +95,7 @@ public class PhotoPage extends MainPage {
         } else {
             Assert.fail("элемент не отображается");
         }
+        return this;
     }
 
     public void verifyPhotoAsAlbumCover() {
@@ -131,24 +136,30 @@ public class PhotoPage extends MainPage {
                 "созданный альбом: " + title + " не приватный");
     }
 
-    public void openAlbum(String title) {
+    public PhotoPage openAlbum(String title) {
+        List<WebElement> button = driver.findElements(By.xpath("//div[@id='ui_albums_load_more']"));
+        if (button.size() == 1 && button.stream().allMatch(WebElement::isDisplayed)) {
+           clickWithJavascript(button.get(0));
+        }
         WebElement element = driver.findElement(By.xpath("//div[contains(@class,'photos_album_thumb crisp')][.//div[@title='" + title + "']]"));
         clickWithJavascript(element);
+        return this;
     }
 
-    public void importPhotoInAlbum(String title) throws InterruptedException {
+    public PhotoPage importPhotoInAlbum(String title) throws InterruptedException {
         WebElement modalWindow = driver.findElement(IMPORT_PHOTO_IN_ALBUM_MODAL_WINDOW);
         WebElement photo = modalWindow.findElement(By.xpath("//div[contains(@class,'photos_album_thumb crisp')]" +
                 "[.//div[@title='" + title + "']]"));
         photo.click();
         Thread.sleep(2000);
+        return this;
     }
 
     public void verifyNotificationImportPhoto() {
         Assert.assertTrue(driver.findElement(NOTIFICATION_IMPORT_PHOTO).isDisplayed(), "уведомление отсутствует");
     }
 
-    public void deleteAlbum(String title) throws InterruptedException {
+    public PhotoPage deleteAlbum(String title) throws InterruptedException {
         WebElement block = driver.findElement(By.xpath("//div[@class='page_block'][.//h1[text()='" + title + "']]"));
         if (isElementFoundAndDisplayed(By.xpath(".//a[text()='Редактировать альбом']"), 5)) {
             block.findElement(By.xpath(".//a[text()='Редактировать альбом']")).click();
@@ -158,12 +169,14 @@ public class PhotoPage extends MainPage {
             Assert.fail("элемент не отображается");
         }
         Thread.sleep(2000);
+        return this;
     }
 
     public void verifyAllAlbumsWereDeleted() {
-        Assert.assertTrue((driver.findElements(ALBUM).size() == 1
-                        && driver.findElement(ALBUM).getText().contains("Фотографии со мной"))
-                        || (driver.findElements(ALBUM).size() == 0),
+        List<WebElement> albums = driver.findElements(ALBUM);
+        Assert.assertTrue(albums.size() <= 2
+                        && albums.stream().allMatch(r->r.getText().contains("Фотографии со мной") ||
+                        r.getText().contains("Фотографии с моей страницы")) || (albums.size() == 0),
                 "Удалены не все альбомы");
     }
 }

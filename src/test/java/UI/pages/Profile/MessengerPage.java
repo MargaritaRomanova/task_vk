@@ -68,8 +68,9 @@ public class MessengerPage extends MainPage {
                 .contains("сегодня\n" + "Тест Автотест создала чат «" + text + "»"), "");
     }
 
-    public void pressTitleForEdit() {
+    public MessengerPage pressTitleForEdit() {
         driver.findElement(CHAT_HEADER).findElement(By.xpath(".//a[contains(@class,'title-main-inner')]")).click();
+        return this;
     }
 
     public void verifyTheDialogueWasPinned(String title) throws InterruptedException {
@@ -84,13 +85,14 @@ public class MessengerPage extends MainPage {
         }
     }
 
-    public void changeTitleChatAndPressEnter(String newText) {
+    public MessengerPage changeTitleChatAndPressEnter(String newText) {
         WebElement element = driver.findElement(CHAT_EDIT_MODAL_WINDOW).findElement(EDIT_TITLE_FIELD);
         element.click();
         WebElement title = element.findElement(By.xpath(".//textarea"));
         title.sendKeys(Keys.DELETE);
         title.sendKeys(newText);
         title.sendKeys(Keys.ENTER);
+        return this;
     }
 
     public void closeEditModalWindow() {
@@ -107,8 +109,9 @@ public class MessengerPage extends MainPage {
         return driver.findElement(INFORMATION_MODAL_WINDOW).findElements(By.xpath(".//li[.//div[@class='Entity']]")).size();
     }
 
-    public void pressAddNewPersonInDialogue() {
+    public MessengerPage pressAddNewPersonInDialogue() {
         driver.findElement(INFORMATION_MODAL_WINDOW).findElement(ADD_NEW_PERSON_BUTTON).click();
+        return this;
     }
 
     public void addNewPersonInDialogue() {
@@ -149,9 +152,11 @@ public class MessengerPage extends MainPage {
                 "сообщение не изменено");
     }
 
-    public void pinAMessageAtTheTop(String text) {
+    public MessengerPage pinAMessageAtTheTop(String text) throws InterruptedException {
         driver.findElement(CHAT_BODY).findElement(By.xpath(".//li[.//div[contains(text(),'" + text + "')]]")).click();
         driver.findElement(PIN_MESSAGE_BUTTON).click();
+        Thread.sleep(1000);
+        return this;
     }
 
     public void verifyPinMessage(String text) {
@@ -162,23 +167,26 @@ public class MessengerPage extends MainPage {
                 "сообщение: " + text + " не закреплено:");
     }
 
-    public void actionWithDialogue(String text) {
+    public MessengerPage actionWithDialogue(String text) {
         WebElement button = driver.findElement(CHAT_HEADER).findElement(ACTIONS_ICON);
         clickWithJavascript(button);
         button.findElement(MENU_ACTIONS_ICON).findElement(By.xpath("./a[normalize-space()='" + text + "']")).click();
+        return this;
     }
 
-    public void activateAllMessagesCheckbox() {
+    public MessengerPage activateAllMessagesCheckbox() {
         WebElement checkbox = driver.findElement(LEAVE_THE_CHAT_MODAL_WINDOW).findElement(DELETE_ALL_MESSAGES_CHECKBOX);
         if (checkbox.getAttribute("aria-checked").equals("false")) {
             checkbox.click();
         }
         Assert.assertEquals(checkbox.getAttribute("aria-checked"), "true",
                 "чекбокс не удалось активировать");
+        return this;
     }
 
-    public void pressLeaveTheChatButton() {
+    public void pressLeaveTheChatButton() throws InterruptedException {
         WebElement modalWindow = driver.findElement(LEAVE_THE_CHAT_MODAL_WINDOW);
         modalWindow.findElement(LEAVE_THE_CHAT_BUTTON).click();
+        Thread.sleep(1000);
     }
 }

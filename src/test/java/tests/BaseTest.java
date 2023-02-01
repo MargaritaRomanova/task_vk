@@ -1,13 +1,10 @@
 package tests;
 import org.openqa.selenium.WebDriver;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.*;
 import utils.DriverFactory;
 import utils.PropertyReader;
 
-public abstract class BaseTest extends TestsData {
+public abstract class BaseTest {
 
     private static WebDriver driver;
 
@@ -15,24 +12,14 @@ public abstract class BaseTest extends TestsData {
         return driver;
     }
 
-    @BeforeClass
+    @BeforeMethod
     public void setUp() {
-        driver = DriverFactory.getDriver(PropertyReader.getBrowser());
+        driver = DriverFactory.getDriver();
         driver.get(PropertyReader.getUrl());
     }
 
-//    @AfterClass
-//    public void tearDown() {
-//        driver.quit();
-//    }
-
-    @AfterTest
+    @AfterMethod
     public void close() {
         driver.quit();
     }
-
-//    @AfterMethod
-//    public void goBack() {
-//        driver.navigate().back();
-//    }
 }
