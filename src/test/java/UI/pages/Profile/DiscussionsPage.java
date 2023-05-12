@@ -69,7 +69,7 @@ public class DiscussionsPage extends MainPage {
         if (isElementFoundAndDisplayed(BLOCK_GALLERY_ITEM, 5)) {
             builder.moveToElement(findElement(BLOCK_GALLERY_ITEM)).perform();
             driver.findElement(ARROW_RIGHT).click();
-            findElement(BLOCK_GALLERY_ITEM).findElement(By.xpath(".//li[@data-tab='discussions']")).click();
+            findElement(By.xpath("//li[@data-tab='discussions']")).click();
             findElement(ADD_DISCUSSION_BUTTON).click();
         }
         return this;
@@ -154,7 +154,7 @@ public class DiscussionsPage extends MainPage {
     }
 
     public DiscussionsPage deleteComment(String comment_id) {
-        WebElement element = driver.findElement(By.xpath("//div[contains(@class,'bp_post clear_fix') and @id='" + comment_id + "']"));
+        WebElement element = findElement(By.xpath("//div[contains(@class,'bp_post clear_fix') and @id='" + comment_id + "']"));
         builder.moveToElement(element);
         clickWithJavascript(element.findElement(DELETE_TOPIC_BUTTON));
         return this;

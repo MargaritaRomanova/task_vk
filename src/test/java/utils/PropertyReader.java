@@ -35,6 +35,22 @@ public class PropertyReader {
         return getProperty("url_api2");
     }
 
+    public static String getJDBC_DRIVER() {
+        return getProperty("JDBC_DRIVER");
+    }
+
+    public static String getJDBC_DB_URL() {
+        return getProperty("JDBC_DB_URL");
+    }
+
+    public static String getJDBC_USER() {
+        return getProperty("JDBC_USER");
+    }
+
+    public static String getJDBC_PASS() {
+        return getProperty("JDBC_PASS");
+    }
+
     private static String getProperty(String propertyName) {
         if (System.getProperty(propertyName) == null) {
             return getPropertyFromFile(propertyName);
@@ -47,7 +63,11 @@ public class PropertyReader {
         Properties prop = new Properties();
         InputStream input = null;
         try {
-            input = new FileInputStream("src/test/resources/framework.properties");
+            if (propertyName.contains("JDBC_")) {
+                input = new FileInputStream("src/test/resources/db.properties");
+            } else {
+                input = new FileInputStream("src/test/resources/framework.properties");
+            }
             prop.load(input);
         } catch (IOException ex) {
             System.out.println("Cannot read property value for " + propertyName);

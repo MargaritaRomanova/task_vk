@@ -14,8 +14,8 @@ public abstract class BaseTest {
     }
 
     @BeforeMethod
-    public void setUp() {
-        JDBC.connectDB("users");
+    public void setUp() throws Exception {
+        JDBC.loadUsersFromDB();
         driver = DriverFactory.getDriver();
         driver.get(PropertyReader.getUrl());
     }

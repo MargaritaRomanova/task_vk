@@ -15,31 +15,28 @@ public class AuthLoginPage extends BasePage {
     }
 
     public String getLoginField() {
-        WebElement elLoginField = driver.findElement(LOGIN_FIELD);
-        return elLoginField.getAttribute("value");
+        return findElement(LOGIN_FIELD).getAttribute("value");
     }
 
     public void verifyLoginFieldIsEmpty() {
-        WebElement elLoginField = driver.findElement(LOGIN_FIELD);
+        WebElement elLoginField = findElement(LOGIN_FIELD);
         if (!elLoginField.getAttribute("value").isEmpty()) {
             elLoginField.clear();
         }
     }
 
     public AuthLoginPage inputLogin(String text) {
-        WebElement elLoginField = driver.findElement(LOGIN_FIELD);
-        elLoginField.sendKeys(text);
+        findElement(LOGIN_FIELD).sendKeys(text);
         return this;
     }
 
     public AuthPassPage pressSignInButton() {
-        driver.findElement(SIGN_IN_BUTTON).click();
+        findElement(SIGN_IN_BUTTON).click();
         return new AuthPassPage();
     }
 
     public AuthLoginPage checkInputLoginContainsText(String text) {
-        WebElement elLoginField = driver.findElement(LOGIN_FIELD);
-        String actualText = elLoginField.getAttribute("value");
+        String actualText = findElement(LOGIN_FIELD).getAttribute("value");
         Assert.assertFalse(actualText.isEmpty(), "Поле ввода логина не заполнено");
         Assert.assertEquals(actualText, text,
                 "Поле ввода логина содержит текст:" + actualText + " ожидалось: " + text);

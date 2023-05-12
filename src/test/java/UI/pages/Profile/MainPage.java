@@ -12,6 +12,6 @@ public class MainPage extends BasePage {
     private final static By SIDE_BAR = By.xpath("//div[@id='side_bar']");
 
     public void choosePageInSideBar(String text) {
-        driver.findElement(SIDE_BAR).findElement(By.xpath(".//span[text()='" + text + "']")).click();
+        findElement(SIDE_BAR).findElement(By.xpath(".//span[text()='" + text + "']")).click();
     }
 }

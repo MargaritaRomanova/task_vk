@@ -93,8 +93,7 @@ public class MessagePage extends MainPage {
     }
 
     public void closeEditModalWindow() {
-        driver.findElement(CHAT_EDIT_MODAL_WINDOW)
-                .findElement(By.xpath(".//button[@class='PopupHeader__closeBtn']")).click();
+        findElement(By.xpath("//button[@class='PopupHeader__closeBtn']")).click();
     }
 
     public void verifyChangeTitle(String oldText, String newText) {
