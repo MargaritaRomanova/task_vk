@@ -6,6 +6,8 @@ import org.testng.annotations.Test;
 import UI.pages.Auth.AuthLoginPage;
 import UI.pages.Auth.AuthPassPage;
 import utils.PropertyReader;
+import utils.SQL.JDBC;
+import utils.SQL.User;
 
 public class UITests extends BaseTest {
 
@@ -14,22 +16,23 @@ public class UITests extends BaseTest {
      *
      * @return возвращает страницу NewsPage
      */
-    private NewsPage login() {
+    private NewsPage login(String login) {
+        User user = JDBC.getUserByLogin(login);
         AuthLoginPage authLoginPage = new AuthLoginPage();
         authLoginPage.verifyLoginFieldIsEmpty();
         Assert.assertTrue(authLoginPage.getLoginField().isEmpty(),
                 "поле ввода логина не удалось очистить");
-        AuthPassPage authPassPage = authLoginPage.inputLogin(PropertyReader.getLogin())
-                .checkInputLoginContainsText(PropertyReader.getLogin())
+        AuthPassPage authPassPage = authLoginPage.inputLogin(user.getLogin())
+                .checkInputLoginContainsText(user.getLogin())
                 .pressSignInButton();
-        authPassPage.inputPass(PropertyReader.getPassword())
+        authPassPage.inputPass(user.getPassword())
                 .checkInputPasswordContainsText();
         return authPassPage.pressContinueButton();
     }
 
     @Test(description = "редактирование личного профиля")
     public void vk_edit_profile() {
-        NewsPage newsPage = login();
+        NewsPage newsPage = login(PropertyReader.getLogin());
         newsPage.choosePageInSideBar("Моя страница");
         EditPage editPage = new MyPage()
                 .pressEditProfileButton();
@@ -61,7 +64,7 @@ public class UITests extends BaseTest {
 
     @Test(description = "работа с личными сообщениями")
     public void vk_conversation() throws InterruptedException {
-        NewsPage newsPage = login();
+        NewsPage newsPage = login(PropertyReader.getLogin());
         newsPage.choosePageInSideBar("Мессенджер");
 
         MessagePage messengerPage = new MessagePage();
@@ -123,7 +126,7 @@ public class UITests extends BaseTest {
 
     @Test(description = "работа с группами")
     public void vk_discussions() throws InterruptedException {
-        NewsPage newsPage = login();
+        NewsPage newsPage = login(PropertyReader.getLogin());
         newsPage.choosePageInSideBar("Сообщества");
         DiscussionsPage discussionsPage = new DiscussionsPage();
 
@@ -168,7 +171,7 @@ public class UITests extends BaseTest {
 
     @Test(description = "работа с фотографиями в альбомах")
     public void vk_photos() throws InterruptedException {
-        NewsPage newsPage = login();
+        NewsPage newsPage = login(PropertyReader.getLogin());
         newsPage.choosePageInSideBar("Фотографии");
         PhotoPage photoPage = new PhotoPage();
 

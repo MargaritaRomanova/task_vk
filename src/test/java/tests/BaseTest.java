@@ -3,6 +3,7 @@ import org.openqa.selenium.WebDriver;
 import org.testng.annotations.*;
 import utils.DriverFactory;
 import utils.PropertyReader;
+import utils.SQL.JDBC;
 
 public abstract class BaseTest {
 
@@ -14,6 +15,7 @@ public abstract class BaseTest {
 
     @BeforeMethod
     public void setUp() {
+        JDBC.connectDB("users");
         driver = DriverFactory.getDriver();
         driver.get(PropertyReader.getUrl());
     }

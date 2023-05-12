@@ -19,10 +19,6 @@ public class PropertyReader {
         return getProperty("login");
     }
 
-    public static String getPassword() {
-        return getProperty("password");
-    }
-
     public static String getAccessToken() {
         return getProperty("access_token");
     }
