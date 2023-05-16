@@ -1,6 +1,7 @@
-*/target/*
+*/target
 */allure-results/*
-.idea/*
+allure-results
+.idea
 *.iml
 *.class
 *.log
@@ -14,8 +15,11 @@
 *.tar.gz
 *.rar
 hs_err_pid*
-*.allure/*
-.build/
-/target/
-allure-results/*
+*/.allure
+*/build
+idea/
+*.xlsx
+*.xls
+*.allure
 target
+target/*
