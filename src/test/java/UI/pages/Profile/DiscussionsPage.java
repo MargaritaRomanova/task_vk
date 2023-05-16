@@ -20,6 +20,7 @@ public class DiscussionsPage extends MainPage {
     private final static By TOPIC_DROPDOWN = By.xpath(".//div[text()='Тематика:']/following::input[@class='selector_input']");
 
     private final static By CREATE_BUTTON = By.xpath(".//span[.//span[text()='Создать сообщество']]");
+    private final static By CAPTCHA = By.xpath("//div[text()='Введите код с картинки']");
 
     private final static By BLOCK_GALLERY_ITEM = By.xpath("//div[@class='ui_gallery__inner_cont']");
     private final static By ARROW_RIGHT = By.xpath("//div[contains(@class,'arrow_right')]");
@@ -63,6 +64,9 @@ public class DiscussionsPage extends MainPage {
         dropdown.sendKeys(topic);
         dropdown.findElement(By.xpath(".//following::*[self::em or self::li][text()='" + topic + "']")).click();
         modalWindow.findElement(CREATE_BUTTON).click();
+        if (isElementFoundAndDisplayed(CAPTCHA, 5)) {
+            Assert.fail("на странице отображается каптча. Создание сообщества временно невозможно");
+        }
     }
 
     public DiscussionsPage selectDiscussions() {
